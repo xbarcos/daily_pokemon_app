@@ -13,6 +13,7 @@ class CoinRewarder {
     }
 
     int coinsToGive = coinsGiven(wrongGuesses);
+    print('Calculando moedas a serem dadas: $coinsToGive');
 
     if (coinsToGive <= 0) {      
       return 0;

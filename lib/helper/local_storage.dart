@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
@@ -26,6 +27,7 @@ class LocalStorage {
   static Future<void> addCoins(int amount) async {
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getInt('coins') ?? 0;
+    debugPrint('Adding $amount coins. Current coins: $current');
     await prefs.setInt('coins', current + amount);
   }
 }

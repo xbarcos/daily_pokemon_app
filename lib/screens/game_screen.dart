@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/pokemon.dart';
+import 'package:flutter/scheduler.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -35,20 +36,20 @@ class _GameScreenState extends State<GameScreen> {
 
   void _loadCoinBalance() async {
     final coins = await LocalStorage.getCoins();
+    debugPrint('Current coin balance: $coins');
     setState(() {
       coinBalance = coins;
     });
   }
 
   void _giveCoinsIfEligible(Pokemon pokemon) async {
-    if (_isGameWon(pokemon) && !coinsGiven) {
-      await CoinRewarder.rewardCoinsBasedOnErrors(wrongGuesses);
-      await LocalStorage.saveGameState('coins_given_$todayKey', 'true');
-
-      setState(() {
-        coinsGiven = true;
-      });
-    }
+    final gaveCoins = await LocalStorage.getGameState('coins_given_$todayKey');
+    if (gaveCoins == 'true') return;
+    await LocalStorage.saveGameState('coins_given_$todayKey', 'true');
+    await CoinRewarder.rewardCoinsBasedOnErrors(wrongGuesses);
+    setState(() {
+      coinsGiven = true;
+    });
   }
 
   void _loadLocalState() async {
@@ -189,7 +190,7 @@ class _GameScreenState extends State<GameScreen> {
         final gameOver = wrongGuesses >= maxErrors;
         final gameWon = _isGameWon(pokemon);
         final reveal = gameOver || gameWon;
-
+        
         if (_isGameWon(pokemon) && !coinsGiven) {
           _giveCoinsIfEligible(pokemon);
           _loadCoinBalance();
